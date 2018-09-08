@@ -2,10 +2,10 @@ if (annyang) {
 
   var isListening = false;
 
-  var serialEven = false;
-  var serialVowel = false;
-  var batteries = 0;
-  var isFrk = false;
+  var serialEven = null;
+  var serialVowel = null;
+  var batteries = null;
+  var isFrk = null;
 
   var evalSerial = function(serial){
 
@@ -63,7 +63,10 @@ if (annyang) {
 
     else if (allWires.length == 4){
 
-      if (countInArray(allWires,"red") > 1 && !serialEven){
+      if (countInArray(allWires,"red") > 1 && serialEven == null){
+        say("need serial number");
+      }
+      else if (countInArray(allWires,"red") > 1 && !serialEven){
         var cutIndex = lastOccuranceInArray(allWires,"red");
         var sayIndex = intoCardinal(cutIndex+1);
         say("cut " + sayIndex);
@@ -89,7 +92,10 @@ if (annyang) {
 
     else if (allWires.length == 5){
 
-      if (allWires[4] == "black" && !serialEven){
+      if (allWires[4] == "black" && serialEven == null){
+        say("need serial number");
+      }
+      else if (allWires[4] == "black" && !serialEven){
         say("cut fourth");
       }
 
@@ -108,7 +114,10 @@ if (annyang) {
     }
 
     else if (allWires.length == 6){
-      if (!allWires.includes("yellow") && !serialEven){
+      if (!allWires.includes("yellow") && serialEven == null){
+        say("need serial number");
+      }
+      else if (!allWires.includes("yellow") && !serialEven){
         say("cut third");
       }
 
@@ -137,9 +146,12 @@ if (annyang) {
       batteries = 2;
       say("batteries two, double");
     }
+    else if (amount == 1){
+      batteries = 1;
+      say("batteries one, single");
+    }
     else{
-      batteries = amount;
-      say("batteries " + amount);
+      say("batteries invalid");
     }
   }
 
@@ -160,16 +172,58 @@ if (annyang) {
       console.log("holdred");
       say("press and release");
     }
-    else if (text = "detonate" && batteries >= 1){
+    else if (isFrk == null){
+      say("need indicator");
+    }
+    else if (text == "detonate" && batteries == null){
+      say("need batteries");
+    }
+    else if (isFrk && batteries == null){
+      say("need batteries");
+    }
+    else if (text == "detonate" && batteries > 1){
       console.log("detonate");
       say("press and release");
     }
-    else if (isFrk && batteries >= 2){
+    else if (isFrk && batteries > 2){
       console.log("frk");
       say("press and release");
     }
     else{
       say("hold");
+    }
+  }
+
+  var checkEval = function(item){
+    if (item == "batteries"){
+      say("check batteries " + batteries)
+    }
+    else if (item == "indicator"){
+      if (isFrk){
+        say("indicator frk is lit");
+      }
+      else{
+        say("indicator frk is not lit");
+      }
+    }
+    else if (item == "serial number even" || item == "serial number odd"){
+      if (serialEven){
+        say("serial is even");
+      }
+      else{
+        say("serial is odd");
+      }
+    }
+    else if (item == "serial number vowel"){
+      if (serialVowel){
+        say("serial does have a vowel");
+      }
+      else{
+        say("serial has no vowel");
+      }
+    }
+    else{
+      say("check invalid");
     }
   }
 
@@ -181,7 +235,11 @@ if (annyang) {
     'push button :color :text': doButton,
     'serial number *serial': evalSerial,
     'indicator :frkyesno': evalFrk,
-    'test': test
+    'test': test,
+    'are you ready': function(){say("ready for defuse");},
+    'good job': function(){say("thank you");},
+    'we blew up': function(){say("press f to pay respects");},
+    'check *item': checkEval
   }
 
   // FUNCTIONS
@@ -271,4 +329,7 @@ if (annyang) {
     console.log("But then again, it could be any of the following: ", phrases);
   });
 
+}
+else{
+  $(".button").html("<span>Device Not Supported</span>");
 }
