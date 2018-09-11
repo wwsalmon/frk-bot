@@ -7,6 +7,15 @@ if (annyang) {
   var batteries = null;
   var isFrk = null;
 
+  var symbols0 = ['tennis racket','alpha tango', 'lambda', 'lightning bolt', 'kitty cat', 'fancy h', 'CDOT'];
+  var symbols1 = ['epsilon', 'tennis racket', 'CDOT', 'swirly a', 'hollow star', 'fancy h', 'question mark'];
+  var symbols2 = ['copyright', 'beard', 'swirly a', 'double k', 'broken 3', 'lambda', 'star'];
+  var symbols3 = ['flat 6', 'paragraph', 'bravo tango', 'kitty cat', 'double k', 'question mark', 'smiley face'];
+  var symbols4 = ['trident', 'smiley face', 'bravo tango', 'CDOT', 'paragraph', 'devil 3', 'star'];
+  var symbols5 = ['flat 6', 'epsilon', 'unequal sign', 'alpha echo', 'trident', 'capital n', 'omega'];
+
+  var allSymbols = [symbols0, symbols1, symbols2, symbols3, symbols4, symbols5];
+
   var evalSerial = function(serial){
 
     say("serial " + serial);
@@ -227,14 +236,77 @@ if (annyang) {
     }
   }
 
+  var doKeypad = function(symbols){
+    var input = symbols.toLowerCase().split(" next ");
+    var column = [];
+    var inputIndex = [];
+    var actualColumn;
+    var actualColumnReal;
+    console.log(input);
+
+    // find all columns of first input
+
+    for (n = 0; n < allSymbols.length; n++){
+      if (allSymbols[n].includes(input[0])){
+        column.push(n);
+        console.log("first input",column);
+      }
+    }
+
+    // for each input, if we haven't already found a single column, remove all columns not including the present input
+
+    for (i = 1; i < input.length; i++){
+      if (column.length == 1){
+        console.log("done",column);
+      }
+      else{
+        for (n = 0; n < column.length; n++){
+          if (!allSymbols[column[n]].includes(input[i])){
+            console.log(n,column[n]);
+            column.splice(n,1);
+            console.log("new input",column);
+          }
+        }
+      }
+    }
+
+    console.log("final", column, column.length);
+
+    if (column.length == 1){
+      selColumn = allSymbols[column[0]];
+      console.log(selColumn);
+      for (i = 0; i < input.length; i++){
+        inputIndex.push(selColumn.indexOf(input[i]));
+      }
+      inputIndex.sort(function(a,b){return a - b});
+      console.log(inputIndex);
+      for (i = 0; i < inputIndex.length; i++){
+        say(selColumn[i]);
+      }
+    }
+    else{
+      say("invalid");
+    }
+
+  }
+
+  var clearBomb = function(){
+    serialEven = null;
+    serialVowel = null;
+    batteries = null;
+    isFrk = null;
+  }
+
   var test = function(){say('test');}
 
   var commands = {
     'wires *wirelist': doWires,
     'batteries :amount': evalBatteries,
-    'push button :color :text': doButton,
-    'serial number *serial': evalSerial,
+    '(push) button :color :text': doButton,
+    'serial (number) *serial': evalSerial,
     'indicator :frkyesno': evalFrk,
+    'keypad *symbols': doKeypad,
+    'new bomb': clearBomb,
     'test': test,
     'are you ready': function(){say("ready for defuse");},
     'good job': function(){say("thank you");},
